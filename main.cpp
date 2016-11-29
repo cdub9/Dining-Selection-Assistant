@@ -1,3 +1,7 @@
+/*
+    This program helps you choose a restarant by pitting two restaurants against each other in a single 
+    elimination style tournament until a single restaurant remains.
+*/
 #include <iostream>
 #include <vector>
 #include <cstdbool>
@@ -8,26 +12,32 @@
 
 using namespace std;
 
+const int NOT_FOUND = -1;
+const int FIRST_OPTION = 1;
+const int SECOND_OPTION = 2;
+const int THIRD_OPTION = 3;
+const int FOURTH_OPTION = 4;
+const int FIFTH_OPTION = 5;
+const int SIXTH_OPTION = 6;
+
 /*
     Checks whether or not a given restaurant name is already in the list
-    @param restaurants
-    @param restaurant_name
+    @param restaurants - The current list of restaurants
+    @param restaurant_name - The name of the restaurant that we're checking to see whether or not it exists in our list
 */
 int find_restaurant(const vector<string> restaurants, string restaurant_name) {
     for (int i = 0; i < restaurants.size(); i++) {
         if (restaurant_name == restaurants[i]) {
-            int location = i;
-            return location;
+            return i;
         }
     }
-    int not_found = -1;
-    return not_found;
+    return NOT_FOUND;
 }
 
 /*
     Adds a new restaurant to the list (vector)
-    @param restaurants
-    @param restaurant_name
+    @param restaurants - The current list of restaurants
+    @param restaurant_name - The name of the restaurant that we're adding to the list
 */
 vector<string> add_restaurant(vector<string>& restaurants, string restaurant_name) {
     restaurants.push_back(restaurant_name);
@@ -37,8 +47,8 @@ vector<string> add_restaurant(vector<string>& restaurants, string restaurant_nam
 
 /*
     Removes a restaurant from the list
-    @param restaurants A current list of all restaurants
-    @param restaurant_to_remove The name of the restaurant to be removed
+    @param restaurants - A current list of all restaurants
+    @param restaurant_to_remove - The name of the restaurant to be removed
 */
 vector<string> remove_restaurant(vector<string>& restaurants, string restaurant_to_remove, int position_of_restaurant_being_removed) {
     int last_pos = restaurants.size() - 1;
@@ -49,8 +59,7 @@ vector<string> remove_restaurant(vector<string>& restaurants, string restaurant_
 
 /*
     Shuffles the current list of restaurants
-    @param 
-    @param
+    @param restaurants - The list of restaurants to be randomly shuffled
 */
 vector<string> shuffle(vector<string> restaurants) {
     string temp;
@@ -64,11 +73,65 @@ vector<string> shuffle(vector<string> restaurants) {
     return restaurants;
 }
 
+/*
+    Check to see if the number of restaurants is a power of 2^n
+    @param restaurants - The list of restaurants that we're counting to find out if the number of restaurants is a power of 2^n
+*/
+bool check_number_of_restaurants(const vector<string> restaurants) {
+    int correct_number_of_restaurants = 0;
+    bool match = false;
+    for (int i = 0; i < restaurants.size(); i++) {
+        correct_number_of_restaurants = pow(2, i);
+        if (correct_number_of_restaurants == restaurants.size()) {
+            cout << endl << "We have an appropriate number of restaurants to start the tournament." << endl << endl;
+            match = true;
+            return match;
+        }
+    }
+    if (match == false) {
+        cout << endl << "Invalid number of restaurants. The number of restaurants must be a power of 2 (e.g. 2^n)." << endl << endl;
+    }
+    return match;
+}
+
+/*
+    Starts the tournament
+    @param restaurants - The vector of restaurants that will be part of the tournament
+*/
+void start_tournament(vector<string>& restaurants) {
+    for (int i = 0; i < restaurants.size(); i++) {
+        bool reprompt = true;
+            int user_selection = 0;
+            while (reprompt == true) {
+                cout << "1: " << restaurants[i] << " or 2: " << restaurants[i + 1] << "? ";
+                cin >> user_selection;
+                if (user_selection == FIRST_OPTION) {
+                    restaurants.erase(restaurants.begin() + (i + 1));
+                    if (restaurants.size() == 1) {
+                        cout << endl << "The winner is " << restaurants[0] << "!" << endl << endl;
+                        reprompt = false;
+                    }
+                    reprompt = false;
+                }
+                else if (user_selection == SECOND_OPTION) {
+                    restaurants.erase(restaurants.begin() + i);
+                    if (restaurants.size() == 1) {
+                        cout << endl << "The winner is " << restaurants[0] << "!" << endl << endl;
+                        reprompt = false;
+                    }
+                    reprompt = false;
+                }
+            }
+        reprompt = false;
+    }
+}
+
 int main() {
     srand(time(0));
     bool keep_going = true;
+    vector<string> restaurants{ "Texas Road House", "Chile\'s", "Outback Steak House", "Olive Garden", "Zupas", "Costa Vida", "Tucanos", "La Jolla Groves" };
+
     while (keep_going) {
-        vector<string> restaurants{ "Texas Road House", "Chile\'s", "Outback Steak House", "Olive Garden", "Zupas", "Costa Vida", "Tucanos", "La Jolla Groves" };
 
         cout << "Please select an option below:" << endl << endl;
         cout << "1 - Display all restaurants" << endl;
@@ -80,7 +143,7 @@ int main() {
         int menu_selection = 0;
         cin >> menu_selection;
 
-        if (menu_selection == 1) {
+        if (menu_selection == FIRST_OPTION) {
             for (int i = 0; i < restaurants.size(); i++) {
                 if (i > 0) {
                     cout << ", ";
@@ -90,29 +153,31 @@ int main() {
             cout << endl << endl;
         }
 
-        if (menu_selection == 2) {
+        if (menu_selection == SECOND_OPTION) {
             cout << "Please enter the restaurant you'd like to add: ";
             string new_restaurant;
-            cin >> new_restaurant;
+            cin.sync();
+            getline(cin, new_restaurant);
 
             int does_restaurant_exist = find_restaurant(restaurants, new_restaurant); // At some point try including this in the find_restaurant and other functions
             if (does_restaurant_exist == -1) {
                 restaurants = add_restaurant(restaurants, new_restaurant);
-                cout << new_restaurant << " was added to the list." << endl << endl;
+                cout << endl << new_restaurant << " was added to the list." << endl << endl;
             }
             else {
                 cout << endl << "That restaurant is already in the list." << endl << endl;
             }
         }
 
-        if (menu_selection == 3) {
+        if (menu_selection == THIRD_OPTION) {
             cout << "Please enter the restaurant you'd like to remove: ";
             string restaurant_to_remove;
-            cin >> restaurant_to_remove;
+            cin.sync();
+            getline(cin, restaurant_to_remove);
 
             int does_restaurant_exist = find_restaurant(restaurants, restaurant_to_remove);
             if (does_restaurant_exist == -1) {
-                cout << endl << "That restaurant is not in the current list" << endl << endl;
+                cout << endl << "That restaurant is not in the current list." << endl << endl;
             }
             else {
                 cout << does_restaurant_exist << endl;
@@ -122,55 +187,28 @@ int main() {
             }
         }
 
-        if (menu_selection == 4) {
+        if (menu_selection == FOURTH_OPTION) {
             restaurants = shuffle(restaurants);
             cout << endl << "The list of restaurants has been shuffled!" << endl << endl;
         }
 
-
-
-        if (menu_selection == 5) {
-            //Make sure the number of restaurants is a power of 2^n, otherwise print error message. There must be a better way to do this...
-            int correct_number_of_restaurants = 0;
-            bool match = false;
-            for (int i = 0; i < restaurants.size(); i++) {
-                correct_number_of_restaurants = pow(2, i);
-                if (correct_number_of_restaurants == restaurants.size()) {
-                    cout << endl << "We have an appropriate number of restaurants to start the tournament." << endl << endl;
-                    match = true;
+        if (menu_selection == FIFTH_OPTION) {
+            bool begin = check_number_of_restaurants(restaurants);
+            if (begin == true) {
+                cout << "The tournament is starting!" << endl << endl;
+                while (restaurants.size() > 1) {
+                    start_tournament(restaurants);
                 }
             }
-            if (match == false) {
-                cout << endl << "The tournament cannot start because we don't have the right number of restaurants to begin with." << endl << endl;
-            }
-
-            //Start the tournament using a function
-
-            //start_tournament() {
-            //
-            //This function should show two restaurants, ask the user to select his favorite, and remove the loser
-            //Input should be either 1 or 2 - reprompt until they provide a 1 or 2
-            //Each restaurant should appear exactly once per round
-            //
-            //}
-        }
-
-
-
-        if (menu_selection == 6) {
+            system("pause");
             keep_going = false;
             return 1;
         }
 
-
-        /*
-        for (int i = 0; i < restaurants.size(); i++) {
-
+        if (menu_selection == SIXTH_OPTION) {
+            keep_going = false;
+            return 1;
         }
-        */
-
-
-
     }
     
     system("pause");
